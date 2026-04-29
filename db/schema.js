@@ -5,12 +5,22 @@ const db = SQLite.openDatabaseSync('repbase.db');
 export const initDB = () => {
   db.execSync(`PRAGMA journal_mode = WAL;`);
 
+  db.execSync('DROP TABLE IF EXISTS session_sets');
+  db.execSync('DROP TABLE IF EXISTS sessions');
+  db.execSync('DROP TABLE IF EXISTS routine_exercises');
+  db.execSync('DROP TABLE IF EXISTS routine_days');
+  db.execSync('DROP TABLE IF EXISTS routines');
+  db.execSync('DROP TABLE IF EXISTS exercises');
+
   db.execSync(`CREATE TABLE IF NOT EXISTS exercises (
-    id         TEXT PRIMARY KEY,
-    name       TEXT NOT NULL,
-    category   TEXT NOT NULL,
-    is_custom  INTEGER DEFAULT 0,
-    created_at TEXT DEFAULT (datetime('now'))
+    id           TEXT PRIMARY KEY,
+    name         TEXT NOT NULL,
+    category     TEXT NOT NULL,
+    muscle_group TEXT NOT NULL DEFAULT '',
+    equipment    TEXT NOT NULL DEFAULT '',
+    instructions TEXT NOT NULL DEFAULT '',
+    is_custom    INTEGER DEFAULT 0,
+    created_at   TEXT DEFAULT (datetime('now'))
   );`);
 
   db.execSync(`CREATE TABLE IF NOT EXISTS routines (
