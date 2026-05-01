@@ -1,4 +1,4 @@
-import { View, Text, ScrollView, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Alert, TextInput } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, router } from 'expo-router';
 import { useState, useEffect, useCallback } from 'react';
@@ -9,15 +9,23 @@ import SetRow from '../../components/SetRow';
 import { getExercisesForDay } from '../../db/routines';
 import { colors, font, radius } from '../../constants/theme';
 import { Ionicons } from '@expo/vector-icons';
+import RestTimer from '../../components/RestTimer';
+import * as Haptics from 'expo-haptics';
+import PlateCalculator from '../../components/PlateCalculator';
+import { updateSessionNotes } from '../../db/sessions';
 
 export default function WorkoutSession() {
   const { id } = useLocalSearchParams();
   const { activeRoutine } = useRoutineStore();
-  const { startWorkout, logSet, finishWorkout, isActive } = useWorkoutStore();
+  const { startWorkout, logSet, finishWorkout, isActive, sessionId } = useWorkoutStore();
   const [exercises, setExercises] = useState([]);
   const [sets, setSets] = useState({});
   const [elapsed, setElapsed] = useState(0);
   const [started, setStarted] = useState(false);
+  const [showRestTimer, setShowRestTimer] = useState(false);
+  const [restDuration, setRestDuration] = useState(90);
+  const [showPlates, setShowPlates] = useState(false);
+  const [workoutNote, setWorkoutNote] = useState('');
 
   useFocusEffect(useCallback(() => {
     const exs = getExercisesForDay(id);
@@ -67,20 +75,35 @@ export default function WorkoutSession() {
 
   const handleCompleteSet = (exerciseId, index) => {
     const set = sets[exerciseId][index];
-    if (!set.weight || !set.reps) return Alert.alert('Fill in weight and reps first');
-    logSet({
-      exerciseId,
-      setNumber: index + 1,
-      weightKg: parseFloat(set.weight),
-      reps: parseInt(set.reps),
-    });
+    const weight = parseFloat(set.weight);
+    const reps = parseInt(set.reps);
+
+    if (!set.weight && !set.reps)
+      return Alert.alert('Missing Info', 'Enter weight and reps before completing a set.');
+    if (!set.weight)
+      return Alert.alert('Missing Weight', 'Enter the weight for this set.');
+    if (!set.reps)
+      return Alert.alert('Missing Reps', 'Enter the reps for this set.');
+    if (isNaN(weight) || weight <= 0)
+      return Alert.alert('Invalid Weight', 'Weight must be a number greater than 0.');
+    if (isNaN(reps) || reps <= 0 || reps > 200)
+      return Alert.alert('Invalid Reps', 'Reps must be between 1 and 200.');
+    if (weight > 1000)
+      return Alert.alert('Invalid Weight', 'Weight cannot exceed 1000kg.');
+    if (set.completed)
+      return Alert.alert('Already Logged', 'This set is already completed.');
+
+    logSet({ exerciseId, setNumber: index + 1, weightKg: weight, reps });
     handleSetChange(exerciseId, index, 'completed', true);
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    setShowRestTimer(true);
   };
 
   const handleFinish = () => {
     Alert.alert('Finish Workout?', 'Your session will be saved', [
       { text: 'Cancel', style: 'cancel' },
       { text: 'Finish', onPress: () => {
+        updateSessionNotes(sessionId, workoutNote);
         finishWorkout();
         router.replace('/(tabs)/history');
       }},
@@ -96,6 +119,14 @@ export default function WorkoutSession() {
         </TouchableOpacity>
         <Text style={{ color: colors.white, fontSize: 20,
           fontWeight: '900', flex: 1 }}>Workout</Text>
+        <TouchableOpacity onPress={() => setShowPlates(true)}
+          style={{ backgroundColor: colors.surface, borderRadius: 8,
+            paddingHorizontal: 10, paddingVertical: 6,
+            borderWidth: 1, borderColor: colors.border,
+            marginRight: 8 }}>
+          <Text style={{ color: colors.accent, fontSize: 10,
+            fontWeight: '800' }}>PLATES</Text>
+        </TouchableOpacity>
         <Text style={{ color: colors.accent, fontSize: 20,
           fontWeight: '900', fontVariant: ['tabular-nums'] }}>
           {formatTime(elapsed)}
@@ -113,6 +144,13 @@ export default function WorkoutSession() {
               letterSpacing: 1 }}>Begin Workout</Text>
           </TouchableOpacity>
         ) : null}
+
+        {showRestTimer && (
+          <RestTimer
+            defaultDuration={restDuration}
+            onSkip={() => setShowRestTimer(false)}
+          />
+        )}
 
         {exercises.map((ex) => (
           <View key={ex.exercise_id} style={{ marginBottom: 20 }}>
@@ -143,15 +181,39 @@ export default function WorkoutSession() {
         ))}
 
         {started && (
-          <TouchableOpacity onPress={handleFinish}
-            style={{ backgroundColor: colors.accent, borderRadius: radius.button,
-              padding: 16, alignItems: 'center', marginTop: 10, marginBottom: 40 }}>
-            <Text style={{ color: '#0D0D0D', fontWeight: '900',
-              fontSize: font.md, textTransform: 'uppercase',
-              letterSpacing: 1 }}>Finish Workout</Text>
-          </TouchableOpacity>
+          <>
+            <View style={{ marginBottom: 16 }}>
+              <Text style={{ color: colors.muted, fontSize: 11,
+                textTransform: 'uppercase', letterSpacing: 1,
+                marginBottom: 8 }}>Session Notes</Text>
+              <TextInput
+                value={workoutNote}
+                onChangeText={setWorkoutNote}
+                placeholder="How did this session feel? Any PRs?"
+                placeholderTextColor={colors.dim}
+                multiline
+                numberOfLines={3}
+                style={{ backgroundColor: colors.surface,
+                  color: colors.white, borderRadius: radius.input,
+                  padding: 14, fontSize: font.md,
+                  borderWidth: 1, borderColor: colors.border,
+                  textAlignVertical: 'top', minHeight: 80 }}
+              />
+            </View>
+            <TouchableOpacity onPress={handleFinish}
+              style={{ backgroundColor: colors.accent, borderRadius: radius.button,
+                padding: 16, alignItems: 'center', marginTop: 10, marginBottom: 40 }}>
+              <Text style={{ color: '#0D0D0D', fontWeight: '900',
+                fontSize: font.md, textTransform: 'uppercase',
+                letterSpacing: 1 }}>Finish Workout</Text>
+            </TouchableOpacity>
+          </>
         )}
       </ScrollView>
+      <PlateCalculator
+        visible={showPlates}
+        onClose={() => setShowPlates(false)}
+      />
     </SafeAreaView>
   );
 }

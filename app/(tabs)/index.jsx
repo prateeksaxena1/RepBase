@@ -8,17 +8,25 @@ import ExerciseCard from '../../components/ExerciseCard';
 import EmptyState from '../../components/EmptyState';
 import { getDaysForRoutine, getExercisesForDay } from '../../db/routines';
 import { colors, font, radius } from '../../constants/theme';
+import LoadingScreen from '../../components/LoadingScreen';
 
 export default function Dashboard() {
   const { activeRoutine, loadRoutines } = useRoutineStore();
+  const [loading, setLoading] = useState(true);
 
-  useFocusEffect(useCallback(() => { loadRoutines(); }, []));
+  useFocusEffect(useCallback(() => {
+    setLoading(true);
+    loadRoutines();
+    setLoading(false);
+  }, []));
 
   const days = activeRoutine ? getDaysForRoutine(activeRoutine.id) : [];
   const today = new Date().toLocaleDateString('en-US', { weekday: 'long' });
   const dayIndex = (new Date().getDay() + 6) % 7;
   const todayDay = days[dayIndex % days.length] || days[0];
   const exercises = todayDay ? getExercisesForDay(todayDay.id) : [];
+
+  if (loading) return <LoadingScreen />;
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.bg }}>

@@ -8,6 +8,7 @@ import { Ionicons } from '@expo/vector-icons';
 import useRoutineStore from '../../store/useRoutineStore';
 import RoutineCard from '../../components/RoutineCard';
 import EmptyState from '../../components/EmptyState';
+import LoadingScreen from '../../components/LoadingScreen';
 import { createRoutine } from '../../db/routines';
 import { colors, font, radius } from '../../constants/theme';
 
@@ -16,13 +17,25 @@ export default function Routines() {
   const [modalVisible, setModalVisible] = useState(false);
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
+  const [loading, setLoading] = useState(true);
 
-  useFocusEffect(useCallback(() => { loadRoutines(); }, []));
+  useFocusEffect(useCallback(() => {
+    setLoading(true);
+    loadRoutines();
+    setLoading(false);
+  }, []));
 
   const handleCreate = () => {
-    if (!name.trim()) return Alert.alert('Name required', 'Please enter a routine name');
+    const trimmed = name.trim();
+    if (!trimmed)
+      return Alert.alert('Name Required', 'Please enter a routine name.');
+    if (trimmed.length < 2)
+      return Alert.alert('Too Short', 'Routine name must be at least 2 characters.');
+    if (trimmed.length > 50)
+      return Alert.alert('Too Long', 'Routine name must be under 50 characters.');
+
     const id = Crypto.randomUUID();
-    createRoutine({ id, name: name.trim(), description: description.trim() });
+    createRoutine({ id, name: trimmed, description: description.trim() });
     setName(''); setDescription('');
     setModalVisible(false);
     loadRoutines();
@@ -43,6 +56,8 @@ export default function Routines() {
       { text: 'Cancel', style: 'cancel' },
     ]);
   };
+
+  if (loading) return <LoadingScreen />;
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.bg }}>

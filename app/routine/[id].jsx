@@ -11,6 +11,7 @@ import { getRoutineById, getDaysForRoutine, getExercisesForDay,
   setActiveRoutine, updateRoutine } from '../../db/routines';
 import { getAllExercises } from '../../db/exercises';
 import { colors, font, radius } from '../../constants/theme';
+import ExercisePicker from '../../components/ExercisePicker';
 
 export default function RoutineDetail() {
   const { id } = useLocalSearchParams();
@@ -163,33 +164,12 @@ export default function RoutineDetail() {
         </TouchableOpacity>
       </ScrollView>
 
-      <Modal visible={showExPicker} transparent animationType="slide">
-        <View style={{ flex: 1, justifyContent: 'flex-end',
-          backgroundColor: 'rgba(0,0,0,0.7)' }}>
-          <View style={{ backgroundColor: colors.surface,
-            borderTopLeftRadius: 20, borderTopRightRadius: 20,
-            padding: 20, maxHeight: '70%' }}>
-            <Text style={{ color: colors.white, fontSize: 18,
-              fontWeight: '800', marginBottom: 16 }}>Add Exercise</Text>
-            <ScrollView>
-              {allExercises.map((ex) => (
-                <TouchableOpacity key={ex.id} onPress={() => handleAddExercise(ex.id)}
-                  style={{ padding: 14, borderBottomWidth: 1,
-                    borderBottomColor: colors.border }}>
-                  <Text style={{ color: colors.white,
-                    fontSize: font.md, fontWeight: '700' }}>{ex.name}</Text>
-                  <Text style={{ color: colors.muted,
-                    fontSize: font.sm }}>{ex.category}</Text>
-                </TouchableOpacity>
-              ))}
-            </ScrollView>
-            <TouchableOpacity onPress={() => setShowExPicker(false)}
-              style={{ alignItems: 'center', padding: 16 }}>
-              <Text style={{ color: colors.muted }}>Cancel</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
+      <ExercisePicker
+        visible={showExPicker}
+        exercises={allExercises}
+        onSelect={(ex) => handleAddExercise(ex.id)}
+        onClose={() => setShowExPicker(false)}
+      />
 
       <Modal visible={editing} transparent animationType="slide">
         <View style={{ flex: 1, justifyContent: 'flex-end',

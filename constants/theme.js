@@ -25,3 +25,7 @@ export const font = {
   xxl: 24,
   hero: 28,
 };
+
+export const defaults = {
+  restDuration: 90,
+};

@@ -21,6 +21,12 @@ const SessionCard = ({ session, onPress }) => {
       </View>
       <Text style={{ color: colors.accent, fontSize: font.sm,
         marginTop: 4 }}>{session.routine_name || 'Free workout'}</Text>
+      {!!session.notes && (
+        <Text numberOfLines={1} style={{ color: colors.muted,
+          fontSize: 11, marginTop: 4, fontStyle: 'italic' }}>
+          "{session.notes}"
+        </Text>
+      )}
     </TouchableOpacity>
   );
 };

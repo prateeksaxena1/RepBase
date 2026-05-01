@@ -6,13 +6,19 @@ import SessionCard from '../../components/SessionCard';
 import EmptyState from '../../components/EmptyState';
 import { getAllSessions } from '../../db/sessions';
 import { colors } from '../../constants/theme';
+import LoadingScreen from '../../components/LoadingScreen';
 
 export default function History() {
   const [sessions, setSessions] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useFocusEffect(useCallback(() => {
+    setLoading(true);
     setSessions(getAllSessions());
+    setLoading(false);
   }, []));
+
+  if (loading) return <LoadingScreen />;
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.bg }}>

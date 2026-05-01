@@ -8,6 +8,8 @@ import { getProgressForExercise, getPersonalBest } from '../../db/sessions';
 import EmptyState from '../../components/EmptyState';
 import { colors, font, radius } from '../../constants/theme';
 import { TouchableOpacity } from 'react-native';
+import LoadingScreen from '../../components/LoadingScreen';
+import OneRMCalculator from '../../components/OneRMCalculator';
 
 export default function Progress() {
   const [exercises, setExercises] = useState([]);
@@ -15,12 +17,16 @@ export default function Progress() {
   const [progress, setProgress] = useState([]);
   const [pb, setPb] = useState(null);
   const [showPicker, setShowPicker] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [showCalc, setShowCalc] = useState(false);
 
   useFocusEffect(useCallback(() => {
+    setLoading(true);
     const exs = getAllExercises();
     setExercises(exs);
     if (!selected && exs.length > 0) selectExercise(exs[0]);
-  }, []));
+    setLoading(false);
+  }, [selected]));
 
   const selectExercise = (ex) => {
     setSelected(ex);
@@ -35,11 +41,22 @@ export default function Progress() {
     value: p.max_weight, label: p.date.slice(5),
   }));
 
+  if (loading) return <LoadingScreen />;
+
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.bg }}>
       <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 20 }}>
-        <Text style={{ color: colors.white, fontSize: 28,
-          fontWeight: '900', marginBottom: 20 }}>Progress</Text>
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between',
+          alignItems: 'center', marginBottom: 20 }}>
+          <Text style={{ color: colors.white, fontSize: 28,
+            fontWeight: '900' }}>Progress</Text>
+          <TouchableOpacity onPress={() => setShowCalc(true)}
+            style={{ backgroundColor: colors.surface, borderRadius: 10,
+              padding: 10, borderWidth: 1, borderColor: colors.border }}>
+            <Text style={{ color: colors.accent, fontSize: 11,
+              fontWeight: '800' }}>1RM CALC</Text>
+          </TouchableOpacity>
+        </View>
 
         <TouchableOpacity onPress={() => setShowPicker(!showPicker)}
           style={{ backgroundColor: colors.surface, borderRadius: radius.card,
@@ -109,6 +126,10 @@ export default function Progress() {
           </>
         )}
       </ScrollView>
+      <OneRMCalculator
+        visible={showCalc}
+        onClose={() => setShowCalc(false)}
+      />
     </SafeAreaView>
   );
 }
