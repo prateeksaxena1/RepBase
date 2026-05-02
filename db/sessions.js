@@ -3,9 +3,15 @@ import db from './schema';
 export const getAllSessions = () => {
   try {
     return db.getAllSync(`
-      SELECT s.*, r.name as routine_name
+      SELECT s.*,
+       r.name as routine_name,
+       COUNT(DISTINCT ss.id) as total_sets,
+       SUM(ss.weight_kg * ss.reps) as total_volume,
+       SUM(ss.is_personal_best) as pr_count
       FROM sessions s
       LEFT JOIN routines r ON s.routine_id = r.id
+      LEFT JOIN session_sets ss ON ss.session_id = s.id
+      GROUP BY s.id
       ORDER BY s.date DESC
     `);
   } catch (error) {
@@ -58,13 +64,13 @@ export const getSetsForSession = (sessionId) => {
   }
 };
 
-export const logSet = ({ id, sessionId, exerciseId, setNumber, weightKg, reps }) => {
+export const logSet = ({ id, sessionId, exerciseId, setNumber, weightKg, reps, setType = 'normal', rpe = null }) => {
   try {
     return db.runSync(
       `INSERT INTO session_sets
-       (id, session_id, exercise_id, set_number, weight_kg, reps, is_personal_best)
-       VALUES (?, ?, ?, ?, ?, ?, 0)`,
-      [id, sessionId, exerciseId, setNumber, weightKg, reps]
+       (id, session_id, exercise_id, set_number, weight_kg, reps, is_personal_best, set_type, rpe)
+       VALUES (?, ?, ?, ?, ?, ?, 0, ?, ?)`,
+      [id, sessionId, exerciseId, setNumber, weightKg, reps, setType, rpe]
     );
   } catch (error) {
     console.error('[RepBase DB Error]', error);
@@ -98,5 +104,96 @@ export const getPersonalBest = (exerciseId) => {
   } catch (error) {
     console.error('[RepBase DB Error]', error);
     return null;
+  }
+};
+
+export const getLastSetsForExercise = (exerciseId) => {
+  try {
+    return db.getAllSync(
+      `SELECT ss.weight_kg, ss.reps, ss.set_number
+       FROM session_sets ss
+       JOIN sessions s ON ss.session_id = s.id
+       WHERE ss.exercise_id = ?
+       ORDER BY s.date DESC, ss.set_number ASC
+       LIMIT 5`,
+      [exerciseId]
+    );
+  } catch (error) {
+    console.error('[RepBase DB Error]', error);
+    return [];
+  }
+};
+
+export const checkPersonalBest = (exerciseId, weightKg) => {
+  try {
+    const pb = db.getFirstSync(
+      `SELECT MAX(weight_kg) as best FROM session_sets
+       WHERE exercise_id = ? AND is_personal_best = 0`,
+      [exerciseId]
+    );
+    return !pb?.best || weightKg > pb.best;
+  } catch (error) {
+    console.error('[RepBase DB Error]', error);
+    return false;
+  }
+};
+
+export const markPersonalBest = (setId) => {
+  try {
+    return db.runSync(
+      'UPDATE session_sets SET is_personal_best = 1 WHERE id = ?',
+      [setId]
+    );
+  } catch (error) {
+    console.error('[RepBase DB Error]', error);
+    return null;
+  }
+};
+
+export const getVolumeOverTime = () => {
+  try {
+    return db.getAllSync(
+      `SELECT s.date,
+       SUM(ss.weight_kg * ss.reps) as total_volume,
+       COUNT(DISTINCT ss.exercise_id) as exercise_count
+       FROM sessions s
+       JOIN session_sets ss ON ss.session_id = s.id
+       GROUP BY s.date
+       ORDER BY s.date ASC`
+    );
+  } catch (error) {
+    console.error('[RepBase DB Error]', error);
+    return [];
+  }
+};
+
+export const getMuscleSplit = () => {
+  try {
+    return db.getAllSync(
+      `SELECT e.muscle_group,
+       COUNT(*) as total_sets,
+       SUM(ss.weight_kg * ss.reps) as total_volume
+       FROM session_sets ss
+       JOIN exercises e ON ss.exercise_id = e.id
+       GROUP BY e.muscle_group
+       ORDER BY total_sets DESC`
+    );
+  } catch (error) {
+    console.error('[RepBase DB Error]', error);
+    return [];
+  }
+};
+
+export const getWorkoutFrequency = () => {
+  try {
+    return db.getAllSync(
+      `SELECT date, COUNT(*) as workout_count
+       FROM sessions
+       GROUP BY date
+       ORDER BY date ASC`
+    );
+  } catch (error) {
+    console.error('[RepBase DB Error]', error);
+    return [];
   }
 };

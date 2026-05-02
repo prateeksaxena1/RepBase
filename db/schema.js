@@ -66,7 +66,9 @@ export const initDB = () => {
       set_number       INTEGER NOT NULL,
       weight_kg        REAL,
       reps             INTEGER,
-      is_personal_best INTEGER DEFAULT 0
+      is_personal_best INTEGER DEFAULT 0,
+      set_type         TEXT DEFAULT 'normal',
+      rpe              INTEGER DEFAULT NULL
     );`);
   } catch (error) {
     console.error('[RepBase DB Error]', error);

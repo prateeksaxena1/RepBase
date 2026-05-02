@@ -2,7 +2,7 @@ import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { useFocusEffect } from 'expo-router';
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import useRoutineStore from '../../store/useRoutineStore';
 import ExerciseCard from '../../components/ExerciseCard';
 import EmptyState from '../../components/EmptyState';

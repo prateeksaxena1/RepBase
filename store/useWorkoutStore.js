@@ -15,10 +15,11 @@ const useWorkoutStore = create((set, get) => ({
     set({ sessionId, exercises, startTime: Date.now(), isActive: true });
   },
 
-  logSet: ({ exerciseId, setNumber, weightKg, reps }) => {
+  logSet: ({ exerciseId, setNumber, weightKg, reps, setType, rpe }) => {
     const { sessionId } = get();
     const id = Crypto.randomUUID();
-    dbLogSet({ id, sessionId, exerciseId, setNumber, weightKg, reps });
+    dbLogSet({ id, sessionId, exerciseId, setNumber, weightKg, reps, setType, rpe });
+    return id;
   },
 
   finishWorkout: () => {

@@ -7,12 +7,13 @@ import useRoutineStore from '../../store/useRoutineStore';
 import useWorkoutStore from '../../store/useWorkoutStore';
 import SetRow from '../../components/SetRow';
 import { getExercisesForDay } from '../../db/routines';
+import { updateSessionNotes, getLastSetsForExercise, checkPersonalBest, markPersonalBest } from '../../db/sessions';
 import { colors, font, radius } from '../../constants/theme';
 import { Ionicons } from '@expo/vector-icons';
 import RestTimer from '../../components/RestTimer';
 import * as Haptics from 'expo-haptics';
 import PlateCalculator from '../../components/PlateCalculator';
-import { updateSessionNotes } from '../../db/sessions';
+import PRCelebration from '../../components/PRCelebration';
 
 export default function WorkoutSession() {
   const { id } = useLocalSearchParams();
@@ -26,13 +27,17 @@ export default function WorkoutSession() {
   const [restDuration, setRestDuration] = useState(90);
   const [showPlates, setShowPlates] = useState(false);
   const [workoutNote, setWorkoutNote] = useState('');
+  const [prData, setPrData] = useState(null);
+  const [prCount, setPrCount] = useState(0);
+  const prevSets = React.useRef({});
 
   useFocusEffect(useCallback(() => {
     const exs = getExercisesForDay(id);
     setExercises(exs);
     const initial = {};
     exs.forEach((ex) => {
-      initial[ex.exercise_id] = [{ reps: '', weight: '', completed: false }];
+      initial[ex.exercise_id] = [{ reps: '', weight: '', completed: false, setType: 'normal', rpe: '' }];
+      prevSets.current[ex.exercise_id] = getLastSetsForExercise(ex.exercise_id);
     });
     setSets(initial);
   }, []));
@@ -61,7 +66,7 @@ export default function WorkoutSession() {
     setSets((prev) => ({
       ...prev,
       [exerciseId]: [...(prev[exerciseId] || []),
-        { reps: '', weight: '', completed: false }],
+        { reps: '', weight: '', completed: false, setType: 'normal', rpe: '' }],
     }));
   };
 
@@ -93,7 +98,19 @@ export default function WorkoutSession() {
     if (set.completed)
       return Alert.alert('Already Logged', 'This set is already completed.');
 
-    logSet({ exerciseId, setNumber: index + 1, weightKg: weight, reps });
+    const rpe = set.rpe ? parseInt(set.rpe) : null;
+    if (set.rpe && (isNaN(rpe) || rpe < 1 || rpe > 10))
+      return Alert.alert('Invalid RPE', 'RPE must be between 1 and 10.');
+
+    const setId = logSet({ exerciseId, setNumber: index + 1, weightKg: weight, reps, setType: set.setType, rpe });
+    
+    const isPR = checkPersonalBest(exerciseId, weight);
+    if (isPR) {
+      markPersonalBest(setId);
+      const ex = exercises.find(e => e.exercise_id === exerciseId);
+      setPrData({ exerciseName: ex?.name, weight });
+      setPrCount(prev => prev + 1);
+    }
     handleSetChange(exerciseId, index, 'completed', true);
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     setShowRestTimer(true);
@@ -104,8 +121,50 @@ export default function WorkoutSession() {
       { text: 'Cancel', style: 'cancel' },
       { text: 'Finish', onPress: () => {
         updateSessionNotes(sessionId, workoutNote);
+        
+        let totalSets = 0;
+        let totalVolume = 0;
+        const exerciseData = [];
+
+        exercises.forEach(ex => {
+          const exSets = (sets[ex.exercise_id] || []).filter(s => s.completed);
+          if (exSets.length === 0) return;
+
+          totalSets += exSets.length;
+          
+          let bestWeight = 0;
+          let bestReps = 0;
+          
+          exSets.forEach(s => {
+            const w = parseFloat(s.weight || 0);
+            const r = parseInt(s.reps || 0);
+            totalVolume += w * r;
+            
+            if (w > bestWeight || (w === bestWeight && r > bestReps)) {
+              bestWeight = w;
+              bestReps = r;
+            }
+          });
+
+          exerciseData.push({
+            name: ex.name,
+            sets: exSets.length,
+            bestWeight,
+            bestReps
+          });
+        });
+
         finishWorkout();
-        router.replace('/(tabs)/history');
+        router.replace({
+          pathname: '/workout/summary',
+          params: {
+            duration: elapsed,
+            totalSets,
+            totalVolume,
+            prs: prCount,
+            exerciseData: JSON.stringify(exerciseData)
+          }
+        });
       }},
     ]);
   };
@@ -160,6 +219,11 @@ export default function WorkoutSession() {
               marginBottom: 10 }}>
               Target: {ex.target_sets} sets · {ex.target_reps} reps
             </Text>
+            {prevSets.current[ex.exercise_id]?.length > 0 && (
+              <View style={{ flexDirection: 'row', paddingHorizontal: 10, marginBottom: 8 }}>
+                <Text style={{ flex: 1, color: colors.muted, fontSize: 10, textAlign: 'center', marginLeft: 32 }}>PREVIOUS</Text>
+              </View>
+            )}
             {(sets[ex.exercise_id] || []).map((set, i) => (
               <SetRow
                 key={i}
@@ -167,6 +231,11 @@ export default function WorkoutSession() {
                 reps={set.reps}
                 weight={set.weight}
                 completed={set.completed}
+                prevSet={prevSets.current[ex.exercise_id]?.[i]}
+                setType={set.setType}
+                rpe={set.rpe}
+                onTypeChange={(v) => handleSetChange(ex.exercise_id, i, 'setType', v)}
+                onRpeChange={(v) => handleSetChange(ex.exercise_id, i, 'rpe', v)}
                 onRepsChange={(v) => handleSetChange(ex.exercise_id, i, 'reps', v)}
                 onWeightChange={(v) => handleSetChange(ex.exercise_id, i, 'weight', v)}
                 onComplete={() => handleCompleteSet(ex.exercise_id, i)}
@@ -213,6 +282,12 @@ export default function WorkoutSession() {
       <PlateCalculator
         visible={showPlates}
         onClose={() => setShowPlates(false)}
+      />
+      <PRCelebration
+        visible={!!prData}
+        exerciseName={prData?.exerciseName}
+        weight={prData?.weight}
+        onClose={() => setPrData(null)}
       />
     </SafeAreaView>
   );
