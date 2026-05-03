@@ -1,7 +1,7 @@
 import { View, Text, ScrollView, TouchableOpacity, Alert, TextInput } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, router } from 'expo-router';
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useFocusEffect } from 'expo-router';
 import useRoutineStore from '../../store/useRoutineStore';
 import useWorkoutStore from '../../store/useWorkoutStore';
@@ -29,7 +29,7 @@ export default function WorkoutSession() {
   const [workoutNote, setWorkoutNote] = useState('');
   const [prData, setPrData] = useState(null);
   const [prCount, setPrCount] = useState(0);
-  const prevSets = React.useRef({});
+  const prevSets = useRef({});
 
   useFocusEffect(useCallback(() => {
     const exs = getExercisesForDay(id);
