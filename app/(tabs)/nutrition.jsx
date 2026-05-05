@@ -93,8 +93,15 @@ export default function Nutrition() {
           marginBottom: 20 }}>
           <Text style={{ color: colors.white, fontSize: 28,
             fontWeight: '900' }}>Nutrition</Text>
-          <Text style={{ color: colors.muted,
-            fontSize: font.sm }}>{date}</Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+            <Text style={{ color: colors.muted,
+              fontSize: font.sm }}>{date}</Text>
+            <TouchableOpacity onPress={() => router.push('/nutrition/goals')}
+              style={{ backgroundColor: colors.surface, borderRadius: 10,
+                padding: 10, borderWidth: 1, borderColor: colors.border }}>
+              <Ionicons name="settings-outline" size={20} color={colors.accent} />
+            </TouchableOpacity>
+          </View>
         </View>
 
         {/* Calorie ring summary */}
