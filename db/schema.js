@@ -70,6 +70,67 @@ export const initDB = () => {
       set_type         TEXT DEFAULT 'normal',
       rpe              INTEGER DEFAULT NULL
     );`);
+
+    db.execSync(`
+      CREATE TABLE IF NOT EXISTS foods (
+        id           TEXT PRIMARY KEY,
+        name         TEXT NOT NULL,
+        brand        TEXT,
+        barcode      TEXT,
+        serving_size REAL DEFAULT 100,
+        serving_unit TEXT DEFAULT 'g',
+        calories     REAL DEFAULT 0,
+        protein      REAL DEFAULT 0,
+        carbs        REAL DEFAULT 0,
+        fat          REAL DEFAULT 0,
+        fiber        REAL DEFAULT 0,
+        sugar        REAL DEFAULT 0,
+        sodium       REAL DEFAULT 0,
+        is_custom    INTEGER DEFAULT 0,
+        created_at   TEXT DEFAULT (datetime('now'))
+      )
+    `);
+
+    db.execSync(`
+      CREATE TABLE IF NOT EXISTS food_logs (
+        id           TEXT PRIMARY KEY,
+        food_id      TEXT NOT NULL REFERENCES foods(id),
+        date         TEXT NOT NULL,
+        meal_type    TEXT NOT NULL,
+        servings     REAL DEFAULT 1,
+        calories     REAL DEFAULT 0,
+        protein      REAL DEFAULT 0,
+        carbs        REAL DEFAULT 0,
+        fat          REAL DEFAULT 0,
+        fiber        REAL DEFAULT 0,
+        sugar        REAL DEFAULT 0,
+        sodium       REAL DEFAULT 0,
+        created_at   TEXT DEFAULT (datetime('now'))
+      )
+    `);
+
+    db.execSync(`
+      CREATE TABLE IF NOT EXISTS nutrition_goals (
+        id       TEXT PRIMARY KEY,
+        calories REAL DEFAULT 2000,
+        protein  REAL DEFAULT 150,
+        carbs    REAL DEFAULT 250,
+        fat      REAL DEFAULT 65,
+        fiber    REAL DEFAULT 30,
+        sugar    REAL DEFAULT 50,
+        sodium   REAL DEFAULT 2300,
+        water_ml REAL DEFAULT 2500
+      )
+    `);
+
+    db.execSync(`
+      CREATE TABLE IF NOT EXISTS water_logs (
+        id       TEXT PRIMARY KEY,
+        date     TEXT NOT NULL,
+        amount_ml REAL NOT NULL,
+        created_at TEXT DEFAULT (datetime('now'))
+      )
+    `);
   } catch (error) {
     console.error('[RepBase DB Error]', error);
     return null;
