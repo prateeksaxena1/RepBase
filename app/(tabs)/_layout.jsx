@@ -30,6 +30,9 @@ export default function TabLayout() {
       <Tabs.Screen name="history"
         options={{ title: 'History',
           tabBarIcon: tabIcon('time-outline') }} />
+      <Tabs.Screen name="nutrition"
+        options={{ title: 'Nutrition',
+          tabBarIcon: tabIcon('nutrition-outline') }} />
       <Tabs.Screen name="progress"
         options={{ title: 'Progress',
           tabBarIcon: tabIcon('bar-chart-outline') }} />
