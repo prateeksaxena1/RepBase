@@ -20,7 +20,8 @@
         {
           "enableFTS": false
         }
-      ]
+      ],
+      "expo-barcode-scanner"
     ],
     "experiments": {
       "typedRoutes": false
