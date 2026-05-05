@@ -6,6 +6,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { colors, font, radius } from '../constants/theme';
 import { searchFoodsLocal, searchFoodAPI,
   createFood, logFood } from '../db/nutrition';
+import BarcodeScanner from './BarcodeScanner';
 
 const FoodSearchModal = ({ visible, mealType, date, onClose, onLogged }) => {
   const [query, setQuery] = useState('');
@@ -282,6 +283,16 @@ const FoodSearchModal = ({ visible, mealType, date, onClose, onLogged }) => {
           )}
         </View>
       </View>
+      <BarcodeScanner
+        visible={showScanner}
+        onFound={(food) => {
+          setShowScanner(false);
+          if (food) setSelected(food);
+          else Alert.alert('Not Found',
+            'Product not in database. Add it manually.');
+        }}
+        onClose={() => setShowScanner(false)}
+      />
     </Modal>
   );
 };
