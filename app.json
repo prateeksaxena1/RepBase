@@ -21,7 +21,12 @@
           "enableFTS": false
         }
       ],
-      "expo-barcode-scanner"
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "RepBase needs camera access to scan food barcodes."
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": false
