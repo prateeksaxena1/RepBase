@@ -167,15 +167,15 @@ const FoodSearchModal = ({ visible, mealType, date, onClose, onLogged }) => {
                           fontSize: 11 }}>{item.brand}</Text>
                       )}
                       <Text style={{ color: colors.muted, fontSize: 11 }}>
-                        P:{Math.round(item.protein)}g ·
-                        C:{Math.round(item.carbs)}g ·
-                        F:{Math.round(item.fat)}g
+                        P:{Math.round(item.protein || 0)}g ·
+                        C:{Math.round(item.carbs || 0)}g ·
+                        F:{Math.round(item.fat || 0)}g
                         per 100g
                       </Text>
                     </View>
                     <Text style={{ color: colors.accent,
                       fontSize: font.md, fontWeight: '800' }}>
-                      {Math.round(item.calories)} kcal
+                      {Math.round(item.calories || 0)} kcal
                     </Text>
                   </TouchableOpacity>
                 )}

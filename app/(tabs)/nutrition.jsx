@@ -259,15 +259,15 @@ export default function Nutrition() {
                       <Text style={{ color: colors.muted,
                         fontSize: 11, marginTop: 2 }}>
                         {log.servings} serving ·
-                        P:{Math.round(log.protein)}g ·
-                        C:{Math.round(log.carbs)}g ·
-                        F:{Math.round(log.fat)}g
+                        P:{Math.round(log.protein || 0)}g ·
+                        C:{Math.round(log.carbs || 0)}g ·
+                        F:{Math.round(log.fat || 0)}g
                       </Text>
                     </View>
                     <View style={{ alignItems: 'flex-end', gap: 6 }}>
                       <Text style={{ color: colors.accent,
                         fontSize: font.md, fontWeight: '800' }}>
-                        {Math.round(log.calories)} kcal
+                        {Math.round(log.calories || 0)} kcal
                       </Text>
                       <TouchableOpacity
                         onPress={() => handleDeleteLog(log.id)}>

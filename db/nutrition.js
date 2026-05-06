@@ -157,6 +157,9 @@ export const searchFoodAPI = async (query) => {
           json: 1,
           page_size: 20,
           fields: 'product_name,brands,nutriments,code,serving_size'
+        },
+        headers: {
+          'User-Agent': 'RepBase - Android/iOS - Version 1.0 - https://github.com/prateeksaxena1/RepBase'
         }
       }
     );
@@ -177,7 +180,7 @@ export const searchFoodAPI = async (query) => {
         ? p.nutriments.sodium_100g * 1000 : 0,
     }));
   } catch (e) {
-    console.error('[API]', e);
+    console.warn('[API] Open Food Facts search failed:', e.message);
     return [];
   }
 };
@@ -185,7 +188,12 @@ export const searchFoodAPI = async (query) => {
 export const getFoodByBarcodeAPI = async (barcode) => {
   try {
     const res = await axios.get(
-      `https://world.openfoodfacts.org/api/v0/product/${barcode}.json`
+      `https://world.openfoodfacts.org/api/v0/product/${barcode}.json`,
+      {
+        headers: {
+          'User-Agent': 'RepBase - Android/iOS - Version 1.0 - https://github.com/prateeksaxena1/RepBase'
+        }
+      }
     );
     const p = res.data.product;
     if (!p) return null;
@@ -205,5 +213,5 @@ export const getFoodByBarcodeAPI = async (barcode) => {
       sodium: p.nutriments?.sodium_100g
         ? p.nutriments.sodium_100g * 1000 : 0,
     };
-  } catch (e) { console.error('[API]', e); return null; }
+  } catch (e) { console.warn('[API] Open Food Facts barcode lookup failed:', e.message); return null; }
 };
