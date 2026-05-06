@@ -1,16 +1,33 @@
-import { Stack } from 'expo-router';
+import { Stack, router, useSegments } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { View, Text, ActivityIndicator } from 'react-native';
+import { useEffect } from 'react';
 import { useDatabase } from '../hooks/useDatabase';
+import useAuthStore from '../store/useAuthStore';
+import { View, ActivityIndicator } from 'react-native';
+import { colors } from '../constants/theme';
 
 export default function RootLayout() {
-  const isReady = useDatabase();
+  useDatabase();
+  const { user, loading, init } = useAuthStore();
+  const segments = useSegments();
 
-  if (!isReady) {
+  useEffect(() => { init(); }, []);
+
+  useEffect(() => {
+    if (loading) return;
+    const inAuthGroup = segments[0] === 'auth';
+    if (!user && !inAuthGroup) {
+      router.replace('/auth/login');
+    } else if (user && inAuthGroup) {
+      router.replace('/(tabs)');
+    }
+  }, [user, loading, segments]);
+
+  if (loading) {
     return (
-      <View style={{ flex: 1, backgroundColor: '#0D0D0D', alignItems: 'center', justifyContent: 'center' }}>
-        <ActivityIndicator size="large" color="#F5C518" />
-        <Text style={{ color: '#888', marginTop: 12, fontSize: 12 }}>Loading RepBase…</Text>
+      <View style={{ flex: 1, backgroundColor: colors.bg,
+        alignItems: 'center', justifyContent: 'center' }}>
+        <ActivityIndicator size="large" color={colors.accent} />
       </View>
     );
   }

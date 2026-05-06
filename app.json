@@ -26,7 +26,9 @@
         {
           "cameraPermission": "RepBase needs camera access to scan food barcodes."
         }
-      ]
+      ],
+      "expo-secure-store",
+      "expo-web-browser"
     ],
     "experiments": {
       "typedRoutes": false

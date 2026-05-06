@@ -6,6 +6,13 @@ export const initDB = () => {
   try {
     db.execSync(`PRAGMA journal_mode = WAL;`);
 
+    try { db.execSync('ALTER TABLE routines ADD COLUMN user_id TEXT'); } catch(e) {}
+    try { db.execSync('ALTER TABLE sessions ADD COLUMN user_id TEXT'); } catch(e) {}
+    try { db.execSync('ALTER TABLE session_sets ADD COLUMN user_id TEXT'); } catch(e) {}
+    try { db.execSync('ALTER TABLE food_logs ADD COLUMN user_id TEXT'); } catch(e) {}
+    try { db.execSync('ALTER TABLE routine_days ADD COLUMN user_id TEXT'); } catch(e) {}
+    try { db.execSync('ALTER TABLE routine_exercises ADD COLUMN user_id TEXT'); } catch(e) {}
+
     db.execSync('DROP TABLE IF EXISTS session_sets');
     db.execSync('DROP TABLE IF EXISTS sessions');
     db.execSync('DROP TABLE IF EXISTS routine_exercises');
@@ -26,6 +33,7 @@ export const initDB = () => {
 
     db.execSync(`CREATE TABLE IF NOT EXISTS routines (
       id          TEXT PRIMARY KEY,
+      user_id     TEXT,
       name        TEXT NOT NULL,
       description TEXT,
       is_active   INTEGER DEFAULT 0,
@@ -35,6 +43,7 @@ export const initDB = () => {
     db.execSync(`CREATE TABLE IF NOT EXISTS routine_days (
       id         TEXT PRIMARY KEY,
       routine_id TEXT NOT NULL REFERENCES routines(id) ON DELETE CASCADE,
+      user_id    TEXT,
       label      TEXT NOT NULL,
       day_order  INTEGER NOT NULL
     );`);
@@ -42,6 +51,7 @@ export const initDB = () => {
     db.execSync(`CREATE TABLE IF NOT EXISTS routine_exercises (
       id             TEXT PRIMARY KEY,
       day_id         TEXT NOT NULL REFERENCES routine_days(id) ON DELETE CASCADE,
+      user_id        TEXT,
       exercise_id    TEXT NOT NULL REFERENCES exercises(id),
       target_sets    INTEGER,
       target_reps    TEXT,
@@ -53,6 +63,7 @@ export const initDB = () => {
 
     db.execSync(`CREATE TABLE IF NOT EXISTS sessions (
       id            TEXT PRIMARY KEY,
+      user_id       TEXT,
       routine_id    TEXT REFERENCES routines(id),
       date          TEXT NOT NULL,
       notes         TEXT,
@@ -61,6 +72,7 @@ export const initDB = () => {
 
     db.execSync(`CREATE TABLE IF NOT EXISTS session_sets (
       id               TEXT PRIMARY KEY,
+      user_id          TEXT,
       session_id       TEXT NOT NULL REFERENCES sessions(id) ON DELETE CASCADE,
       exercise_id      TEXT NOT NULL REFERENCES exercises(id),
       set_number       INTEGER NOT NULL,
@@ -94,6 +106,7 @@ export const initDB = () => {
     db.execSync(`
       CREATE TABLE IF NOT EXISTS food_logs (
         id           TEXT PRIMARY KEY,
+        user_id      TEXT,
         food_id      TEXT NOT NULL REFERENCES foods(id),
         date         TEXT NOT NULL,
         meal_type    TEXT NOT NULL,
