@@ -1,11 +1,17 @@
-import { View, Text, ScrollView, TouchableOpacity, Share } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Share, TextInput } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, router } from 'expo-router';
+import { useState } from 'react';
+import { createPost } from '../../lib/social';
 import { colors, font, radius } from '../../constants/theme';
 import { Ionicons } from '@expo/vector-icons';
 
 export default function WorkoutSummary() {
   const params = useLocalSearchParams();
+  const sessionId = params.sessionId;
+  const [caption, setCaption] = useState('');
+  const [sharing, setSharing] = useState(false);
+  const [shared, setShared] = useState(false);
   
   const duration = parseInt(params.duration || 0);
   const totalSets = parseInt(params.totalSets || 0);
@@ -80,12 +86,58 @@ export default function WorkoutSummary() {
           </View>
         ))}
 
-        <TouchableOpacity onPress={handleShare} style={{ backgroundColor: colors.surface,
-          borderRadius: radius.button, padding: 16, alignItems: 'center', marginTop: 20,
-          borderWidth: 1, borderColor: colors.accent }}>
-          <Text style={{ color: colors.accent, fontWeight: '900', fontSize: font.md,
-            textTransform: 'uppercase', letterSpacing: 1 }}>Share Workout</Text>
-        </TouchableOpacity>
+        
+        {!shared ? (
+          <View style={{ marginBottom: 16 }}>
+            <Text style={{ color: colors.muted, fontSize: 11,
+              textTransform: 'uppercase', letterSpacing: 0.5,
+              marginBottom: 8 }}>Share to Community</Text>
+            <TextInput
+              value={caption}
+              onChangeText={setCaption}
+              placeholder="Add a caption... (optional)"
+              placeholderTextColor={colors.dim}
+              multiline
+              style={{ backgroundColor: colors.surface,
+                color: colors.white, borderRadius: radius.input,
+                padding: 14, fontSize: font.md,
+                borderWidth: 1, borderColor: colors.border,
+                minHeight: 70, textAlignVertical: 'top',
+                marginBottom: 10 }}
+            />
+            <TouchableOpacity
+              onPress={async () => {
+                setSharing(true);
+                try {
+                  await createPost(sessionId, caption);
+                  setShared(true);
+                } catch (e) { console.error(e); }
+                finally { setSharing(false); }
+              }}
+              disabled={sharing}
+              style={{ backgroundColor: sharing
+                ? colors.dim : colors.surface,
+                borderRadius: radius.button, padding: 14,
+                alignItems: 'center', borderWidth: 1,
+                borderColor: colors.accent }}>
+              <Text style={{ color: colors.accent,
+                fontWeight: '900', fontSize: font.md,
+                textTransform: 'uppercase' }}>
+                {sharing ? 'Sharing...' : '🏋️ Share Workout'}
+              </Text>
+            </TouchableOpacity>
+          </View>
+        ) : (
+          <View style={{ backgroundColor: colors.surface,
+            borderRadius: radius.card, padding: 14,
+            alignItems: 'center', marginBottom: 16,
+            borderWidth: 1, borderColor: colors.accent }}>
+            <Text style={{ color: colors.accent,
+              fontWeight: '800', fontSize: font.md }}>
+              ✓ Shared to community!
+            </Text>
+          </View>
+        )}
 
         <TouchableOpacity onPress={() => router.replace('/(tabs)/history')} style={{ backgroundColor: colors.accent,
           borderRadius: radius.button, padding: 16, alignItems: 'center', marginTop: 12, marginBottom: 40 }}>
