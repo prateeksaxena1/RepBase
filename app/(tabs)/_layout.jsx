@@ -30,6 +30,9 @@ export default function TabLayout() {
       <Tabs.Screen name="history"
         options={{ title: 'History',
           tabBarIcon: tabIcon('time-outline') }} />
+      <Tabs.Screen name="social"
+        options={{ title: 'Community',
+          tabBarIcon: tabIcon('people-outline') }} />
       <Tabs.Screen name="nutrition"
         options={{ title: 'Nutrition',
           tabBarIcon: tabIcon('nutrition-outline') }} />
