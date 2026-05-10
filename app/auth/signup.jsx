@@ -29,10 +29,7 @@ export default function Signup() {
     setLoading(true);
     try {
       await signUp(email.trim(), password, username.trim());
-      Alert.alert('Check your email',
-        'We sent a confirmation link. Verify your email then log in.',
-        [{ text: 'OK', onPress: () => router.replace('/auth/login') }]
-      );
+      router.replace('/onboarding/setup');
     } catch (e) {
       Alert.alert('Signup failed', e.message);
     } finally {
