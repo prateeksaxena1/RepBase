@@ -1,3 +1,4 @@
+import { View, Text, TouchableOpacity } from 'react-native';
 import * as Animatable from 'react-native-animatable';
 import * as Haptics from 'expo-haptics';
 import { colors, font, radius } from '../constants/theme';
