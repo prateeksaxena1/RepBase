@@ -1,10 +1,13 @@
 import { View, Text, TouchableOpacity } from 'react-native';
+import * as Animatable from 'react-native-animatable';
 import { colors, font, radius } from '../constants/theme';
 
-const RoutineCard = ({ routine, onPress, onLongPress }) => (
-  <TouchableOpacity
-    onPress={onPress}
-    onLongPress={onLongPress}
+const RoutineCard = ({ routine, onPress, onLongPress, index = 0 }) => (
+  <Animatable.View animation="fadeInUp" delay={index * 80} duration={300}>
+    <TouchableOpacity
+      activeOpacity={0.8}
+      onPress={onPress}
+      onLongPress={onLongPress}
     style={{
       backgroundColor: colors.surface,
       borderRadius: radius.card,
@@ -40,7 +43,8 @@ const RoutineCard = ({ routine, onPress, onLongPress }) => (
         </View>
       ))}
     </View>
-  </TouchableOpacity>
+    </TouchableOpacity>
+  </Animatable.View>
 );
 
 export default RoutineCard;

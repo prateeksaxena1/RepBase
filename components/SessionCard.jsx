@@ -1,7 +1,8 @@
 import { View, Text, TouchableOpacity } from 'react-native';
+import * as Animatable from 'react-native-animatable';
 import { colors, font, radius } from '../constants/theme';
 
-const SessionCard = ({ session, onPress }) => {
+const SessionCard = ({ session, onPress, index = 0 }) => {
   const formatDuration = (secs) => {
     if (!secs) return '--';
     const m = Math.floor(secs / 60);
@@ -9,7 +10,8 @@ const SessionCard = ({ session, onPress }) => {
   };
 
   return (
-    <TouchableOpacity onPress={onPress} style={{
+    <Animatable.View animation="fadeInUp" delay={index * 80} duration={300}>
+      <TouchableOpacity activeOpacity={0.8} onPress={onPress} style={{
       backgroundColor: colors.surface, borderRadius: radius.card,
       padding: 14, marginBottom: 10, borderWidth: 1, borderColor: colors.border,
     }}>
@@ -39,7 +41,8 @@ const SessionCard = ({ session, onPress }) => {
           "{session.notes}"
         </Text>
       )}
-    </TouchableOpacity>
+      </TouchableOpacity>
+    </Animatable.View>
   );
 };
 

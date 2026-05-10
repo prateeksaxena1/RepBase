@@ -4,6 +4,7 @@ import { router } from 'expo-router';
 import useAuthStore from '../../store/useAuthStore';
 import { colors, font, radius } from '../../constants/theme';
 import { Ionicons } from '@expo/vector-icons';
+import * as Animatable from 'react-native-animatable';
 import { loadDemoData } from '../../lib/demoData';
 import { useRoute } from '@react-navigation/native';
 
@@ -24,8 +25,9 @@ export default function Profile() {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.bg }}>
-      <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
-        <View style={{ padding: 20 }}>
+      <Animatable.View animation="fadeInUp" duration={400} style={{ flex: 1 }}>
+        <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
+          <View style={{ padding: 20 }}>
           <Text style={{ color: colors.white, fontSize: 28,
             fontWeight: '900', marginBottom: 32 }}>Profile</Text>
 
@@ -118,9 +120,10 @@ export default function Profile() {
               color="#FF4444" />
             <Text style={{ color: '#FF4444', fontSize: font.md,
               fontWeight: '700' }}>Sign Out</Text>
-          </TouchableOpacity>
-        </View>
-      </ScrollView>
+            </TouchableOpacity>
+          </View>
+        </ScrollView>
+      </Animatable.View>
     </SafeAreaView>
   );
 }

@@ -3,6 +3,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useState, useCallback } from 'react';
 import { useFocusEffect } from 'expo-router';
 import { LineChart, BarChart } from 'react-native-gifted-charts';
+import * as Animatable from 'react-native-animatable';
 import { getAllExercises } from '../../db/exercises';
 import { getProgressForExercise, getPersonalBest, getVolumeOverTime, getMuscleSplit, getWorkoutFrequency } from '../../db/sessions';
 import EmptyState from '../../components/EmptyState';
@@ -221,13 +222,6 @@ export default function Progress() {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.bg }}>
-      <View style={{ flexDirection: 'row', justifyContent: 'space-between',
-        alignItems: 'center', padding: 20, paddingBottom: 0 }}>
-        <Text style={{ color: colors.white, fontSize: 28,
-          fontWeight: '900' }}>Progress</Text>
-        <TouchableOpacity onPress={() => setShowCalc(true)}
-          style={{ backgroundColor: colors.surface, borderRadius: 10,
-            padding: 10, borderWidth: 1, borderColor: colors.border }}>
           <Text style={{ color: colors.accent, fontSize: 11,
             fontWeight: '800' }}>1RM CALC</Text>
         </TouchableOpacity>

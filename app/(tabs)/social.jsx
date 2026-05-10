@@ -5,6 +5,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useState, useCallback } from 'react';
 import { useFocusEffect, router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import * as Animatable from 'react-native-animatable';
 import { colors, font, radius } from '../../constants/theme';
 import { getFeed, getPublicFeed, likePost,
   unlikePost } from '../../lib/social';
@@ -159,100 +160,102 @@ export default function Social() {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.bg }}>
-      <View style={{ padding: 20, paddingBottom: 0 }}>
-        {/* Header */}
-        <View style={{ flexDirection: 'row',
-          justifyContent: 'space-between', alignItems: 'center',
-          marginBottom: 16 }}>
-          <Text style={{ color: colors.white, fontSize: 28,
-            fontWeight: '900' }}>Community</Text>
-          <TouchableOpacity
-            onPress={() => router.push('/social/search')}
-            style={{ backgroundColor: colors.surface,
-              borderRadius: 10, padding: 10,
-              borderWidth: 1, borderColor: colors.border }}>
-            <Ionicons name="search-outline"
-              size={20} color={colors.accent} />
-          </TouchableOpacity>
-        </View>
-
-        {/* Tabs */}
-        <View style={{ flexDirection: 'row', gap: 8,
-          marginBottom: 16 }}>
-          {['following', 'discover'].map((t) => (
-            <TouchableOpacity key={t} onPress={() => setTab(t)}
-              style={{ flex: 1, paddingVertical: 10,
-                borderRadius: 10, alignItems: 'center',
-                backgroundColor: tab === t
-                  ? colors.accent : colors.surface,
-                borderWidth: 1,
-                borderColor: tab === t
-                  ? colors.accent : colors.border }}>
-              <Text style={{
-                color: tab === t ? '#0D0D0D' : colors.muted,
-                fontSize: font.sm, fontWeight: '800',
-                textTransform: 'uppercase', letterSpacing: 0.5,
-              }}>{t}</Text>
+      <Animatable.View animation="fadeInUp" duration={400} style={{ flex: 1 }}>
+        <View style={{ flex: 1, padding: 20 }}>
+          {/* Header */}
+          <View style={{ flexDirection: 'row',
+            justifyContent: 'space-between', alignItems: 'center',
+            marginBottom: 16 }}>
+            <Text style={{ color: colors.white, fontSize: 28,
+              fontWeight: '900' }}>Community</Text>
+            <TouchableOpacity
+              onPress={() => router.push('/social/search')}
+              style={{ backgroundColor: colors.surface,
+                borderRadius: 10, padding: 10,
+                borderWidth: 1, borderColor: colors.border }}>
+              <Ionicons name="search-outline"
+                size={20} color={colors.accent} />
             </TouchableOpacity>
-          ))}
-        </View>
-      </View>
+          </View>
 
-      {loading ? (
-        <ActivityIndicator color={colors.accent}
-          style={{ marginTop: 40 }} />
-      ) : (
-        <FlatList
-          data={posts}
-          keyExtractor={(item) => item.id}
-          renderItem={({ item }) => <PostCard post={item} />}
-          contentContainerStyle={{ padding: 20, paddingTop: 8 }}
-          showsVerticalScrollIndicator={false}
-          refreshControl={
-            <RefreshControl
-              refreshing={refreshing}
-              onRefresh={() => { setRefreshing(true); loadFeed(); }}
-              tintColor={colors.accent}
-            />
-          }
-          ListEmptyComponent={() => (
-            <View style={{ alignItems: 'center',
-              paddingTop: 60 }}>
-              <Ionicons name="people-outline"
-                size={48} color={colors.dim} />
-              <Text style={{ color: colors.white,
-                fontSize: font.lg, fontWeight: '800',
-                marginTop: 16, textAlign: 'center' }}>
-                {tab === 'following'
-                  ? 'No posts yet'
-                  : 'No workouts shared yet'}
-              </Text>
-              <Text style={{ color: colors.muted,
-                fontSize: font.sm, textAlign: 'center',
-                marginTop: 8 }}>
-                {tab === 'following'
-                  ? 'Follow athletes to see their workouts'
-                  : 'Be the first to share a workout!'}
-              </Text>
-              {tab === 'following' && (
-                <TouchableOpacity
-                  onPress={() => setTab('discover')}
-                  style={{ marginTop: 20,
-                    backgroundColor: colors.accent,
-                    borderRadius: radius.button,
-                    paddingHorizontal: 24,
-                    paddingVertical: 12 }}>
-                  <Text style={{ color: '#0D0D0D',
-                    fontWeight: '900', fontSize: font.md,
-                    textTransform: 'uppercase' }}>
-                    Discover Athletes
+          {/* Tabs */}
+          <View style={{ flexDirection: 'row', gap: 8,
+            marginBottom: 16 }}>
+            {['following', 'discover'].map((t) => (
+              <TouchableOpacity key={t} onPress={() => setTab(t)}
+                style={{ flex: 1, paddingVertical: 10,
+                  borderRadius: 10, alignItems: 'center',
+                  backgroundColor: tab === t
+                    ? colors.accent : colors.surface,
+                  borderWidth: 1,
+                  borderColor: tab === t
+                    ? colors.accent : colors.border }}>
+                <Text style={{
+                  color: tab === t ? '#0D0D0D' : colors.muted,
+                  fontSize: font.sm, fontWeight: '800',
+                  textTransform: 'uppercase', letterSpacing: 0.5,
+                }}>{t}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+
+          {loading ? (
+            <ActivityIndicator color={colors.accent}
+              style={{ marginTop: 40 }} />
+          ) : (
+            <FlatList
+              data={posts}
+              keyExtractor={(item) => item.id}
+              renderItem={({ item }) => <PostCard post={item} />}
+              contentContainerStyle={{ paddingBottom: 20, paddingTop: 8 }}
+              showsVerticalScrollIndicator={false}
+              refreshControl={
+                <RefreshControl
+                  refreshing={refreshing}
+                  onRefresh={() => { setRefreshing(true); loadFeed(); }}
+                  tintColor={colors.accent}
+                />
+              }
+              ListEmptyComponent={() => (
+                <View style={{ alignItems: 'center',
+                  paddingTop: 60 }}>
+                  <Ionicons name="people-outline"
+                    size={48} color={colors.dim} />
+                  <Text style={{ color: colors.white,
+                    fontSize: font.lg, fontWeight: '800',
+                    marginTop: 16, textAlign: 'center' }}>
+                    {tab === 'following'
+                      ? 'No posts yet'
+                      : 'No workouts shared yet'}
                   </Text>
-                </TouchableOpacity>
+                  <Text style={{ color: colors.muted,
+                    fontSize: font.sm, textAlign: 'center',
+                    marginTop: 8 }}>
+                    {tab === 'following'
+                      ? 'Follow athletes to see their workouts'
+                      : 'Be the first to share a workout!'}
+                  </Text>
+                  {tab === 'following' && (
+                    <TouchableOpacity
+                      onPress={() => setTab('discover')}
+                      style={{ marginTop: 20,
+                        backgroundColor: colors.accent,
+                        borderRadius: radius.button,
+                        paddingHorizontal: 24,
+                        paddingVertical: 12 }}>
+                      <Text style={{ color: '#0D0D0D',
+                        fontWeight: '900', fontSize: font.md,
+                        textTransform: 'uppercase' }}>
+                        Discover Athletes
+                      </Text>
+                    </TouchableOpacity>
+                  )}
+                </View>
               )}
-            </View>
+            />
           )}
-        />
-      )}
+        </View>
+      </Animatable.View>
     </SafeAreaView>
   );
 }

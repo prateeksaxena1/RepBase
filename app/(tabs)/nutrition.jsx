@@ -5,6 +5,7 @@ import { useState, useCallback } from 'react';
 import { useFocusEffect, router } from 'expo-router';
 import * as Crypto from 'expo-crypto';
 import { Ionicons } from '@expo/vector-icons';
+import * as Animatable from 'react-native-animatable';
 import { colors, font, radius } from '../../constants/theme';
 import {
   getFoodLogsForDate, getDailyTotals, getNutritionGoals,
@@ -85,9 +86,10 @@ export default function Nutrition() {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.bg }}>
-      <ScrollView contentContainerStyle={{ padding: 20 }}>
+      <Animatable.View animation="fadeInUp" duration={400} style={{ flex: 1 }}>
+        <ScrollView contentContainerStyle={{ padding: 20 }}>
 
-        {/* Header */}
+          {/* Header */}
         <View style={{ flexDirection: 'row',
           justifyContent: 'space-between', alignItems: 'center',
           marginBottom: 20 }}>
@@ -291,6 +293,7 @@ export default function Nutrition() {
         onClose={() => setShowFoodSearch(false)}
         onLogged={() => { setShowFoodSearch(false); reload(); }}
       />
+      </Animatable.View>
     </SafeAreaView>
   );
 }

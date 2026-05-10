@@ -3,6 +3,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
+import * as Animatable from 'react-native-animatable';
 import useRoutineStore from '../../store/useRoutineStore';
 import ExerciseCard from '../../components/ExerciseCard';
 import EmptyState from '../../components/EmptyState';
@@ -30,9 +31,10 @@ export default function Dashboard() {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.bg }}>
-      <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 20 }}>
-        <View style={{ flexDirection: 'row',
-          justifyContent: 'space-between', alignItems: 'flex-start' }}>
+      <Animatable.View animation="fadeInUp" duration={400} style={{ flex: 1 }}>
+        <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 20 }}>
+          <View style={{ flexDirection: 'row',
+            justifyContent: 'space-between', alignItems: 'flex-start' }}>
           <View>
             <Text style={{ color: colors.muted, fontSize: font.sm,
               letterSpacing: 1, textTransform: 'uppercase' }}>{today}</Text>
@@ -94,6 +96,7 @@ export default function Dashboard() {
           </>
         )}
       </ScrollView>
+      </Animatable.View>
     </SafeAreaView>
   );
 }

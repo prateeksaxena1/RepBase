@@ -3,6 +3,7 @@ import { View, Text, ScrollView, TouchableOpacity,
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useState, useCallback } from 'react';
 import { router, useFocusEffect } from 'expo-router';
+import * as Animatable from 'react-native-animatable';
 import * as Crypto from 'expo-crypto';
 import { Ionicons } from '@expo/vector-icons';
 import useRoutineStore from '../../store/useRoutineStore';
@@ -61,8 +62,9 @@ export default function Routines() {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.bg }}>
-      <View style={{ flex: 1, padding: 20 }}>
-        <View style={{ flexDirection: 'row',
+      <Animatable.View animation="fadeInUp" duration={400} style={{ flex: 1 }}>
+        <View style={{ flex: 1, padding: 20 }}>
+          <View style={{ flexDirection: 'row',
           justifyContent: 'space-between', alignItems: 'flex-start',
           marginBottom: 20 }}>
           <View>
@@ -139,6 +141,7 @@ export default function Routines() {
           </View>
         </View>
       </Modal>
+      </Animatable.View>
     </SafeAreaView>
   );
 }
