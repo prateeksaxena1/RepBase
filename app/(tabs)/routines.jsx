@@ -10,7 +10,7 @@ import { Ionicons } from '@expo/vector-icons';
 import useRoutineStore from '../../store/useRoutineStore';
 import RoutineCard from '../../components/RoutineCard';
 import EmptyState from '../../components/EmptyState';
-import LoadingScreen from '../../components/LoadingScreen';
+import SkeletonCard from '../../components/SkeletonCard';
 import { createRoutine } from '../../db/routines';
 import { colors, font, radius } from '../../constants/theme';
 
@@ -60,7 +60,13 @@ export default function Routines() {
     ]);
   };
 
-  if (loading) return <LoadingScreen />;
+  if (loading) return (
+    <SafeAreaView style={{ flex: 1, backgroundColor: colors.bg }}>
+      <View style={{ padding: 20 }}>
+        {[1,2,3,4].map((i) => <SkeletonCard key={i} height={90} />)}
+      </View>
+    </SafeAreaView>
+  );
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.bg }}>

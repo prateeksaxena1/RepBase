@@ -7,7 +7,7 @@ import SessionCard from '../../components/SessionCard';
 import EmptyState from '../../components/EmptyState';
 import { getAllSessions } from '../../db/sessions';
 import { colors } from '../../constants/theme';
-import LoadingScreen from '../../components/LoadingScreen';
+import SkeletonCard from '../../components/SkeletonCard';
 
 export default function History() {
   const [sessions, setSessions] = useState([]);
@@ -19,7 +19,13 @@ export default function History() {
     setLoading(false);
   }, []));
 
-  if (loading) return <LoadingScreen />;
+  if (loading) return (
+    <SafeAreaView style={{ flex: 1, backgroundColor: colors.bg }}>
+      <View style={{ padding: 20 }}>
+        {[1,2,3,4].map((i) => <SkeletonCard key={i} height={90} />)}
+      </View>
+    </SafeAreaView>
+  );
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.bg }}>
