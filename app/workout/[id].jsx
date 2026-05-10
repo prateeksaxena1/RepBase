@@ -120,6 +120,7 @@ export default function WorkoutSession() {
     Alert.alert('Finish Workout?', 'Your session will be saved', [
       { text: 'Cancel', style: 'cancel' },
       { text: 'Finish', onPress: () => {
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
         updateSessionNotes(sessionId, workoutNote);
         
         let totalSets = 0;

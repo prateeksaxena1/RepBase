@@ -1,13 +1,23 @@
-import { View, Text, TouchableOpacity } from 'react-native';
 import * as Animatable from 'react-native-animatable';
+import * as Haptics from 'expo-haptics';
 import { colors, font, radius } from '../constants/theme';
 
-const RoutineCard = ({ routine, onPress, onLongPress, index = 0 }) => (
+const RoutineCard = ({ routine, onPress, onLongPress, index = 0 }) => {
+  const handlePress = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    if (onPress) onPress();
+  };
+  const handleLongPress = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    if (onLongPress) onLongPress();
+  };
+
+  return (
   <Animatable.View animation="fadeInUp" delay={index * 80} duration={300}>
     <TouchableOpacity
       activeOpacity={0.8}
-      onPress={onPress}
-      onLongPress={onLongPress}
+      onPress={handlePress}
+      onLongPress={handleLongPress}
     style={{
       backgroundColor: colors.surface,
       borderRadius: radius.card,
@@ -45,6 +55,7 @@ const RoutineCard = ({ routine, onPress, onLongPress, index = 0 }) => (
     </View>
     </TouchableOpacity>
   </Animatable.View>
-);
+  );
+};
 
 export default RoutineCard;

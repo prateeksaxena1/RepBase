@@ -5,6 +5,7 @@ import { useState, useCallback } from 'react';
 import { router, useFocusEffect } from 'expo-router';
 import * as Animatable from 'react-native-animatable';
 import * as Crypto from 'expo-crypto';
+import * as Haptics from 'expo-haptics';
 import { Ionicons } from '@expo/vector-icons';
 import useRoutineStore from '../../store/useRoutineStore';
 import RoutineCard from '../../components/RoutineCard';
@@ -37,6 +38,7 @@ export default function Routines() {
 
     const id = Crypto.randomUUID();
     createRoutine({ id, name: trimmed, description: description.trim() });
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     setName(''); setDescription('');
     setModalVisible(false);
     loadRoutines();

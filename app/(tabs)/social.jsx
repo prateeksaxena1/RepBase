@@ -6,6 +6,7 @@ import { useState, useCallback } from 'react';
 import { useFocusEffect, router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import * as Animatable from 'react-native-animatable';
+import * as Haptics from 'expo-haptics';
 import { colors, font, radius } from '../../constants/theme';
 import { getFeed, getPublicFeed, likePost,
   unlikePost } from '../../lib/social';
@@ -37,7 +38,8 @@ export default function Social() {
     loadFeed();
   }, [tab]));
 
-  const handleLike = async (post) => {
+  const toggleLike = async (post) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     const alreadyLiked = post.likes?.some((l) => l.user_id === user?.id);
     try {
       if (alreadyLiked) await unlikePost(post.id);
