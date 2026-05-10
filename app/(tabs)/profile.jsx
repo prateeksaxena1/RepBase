@@ -4,6 +4,8 @@ import { router } from 'expo-router';
 import useAuthStore from '../../store/useAuthStore';
 import { colors, font, radius } from '../../constants/theme';
 import { Ionicons } from '@expo/vector-icons';
+import { loadDemoData } from '../../lib/demoData';
+import { useRoute } from '@react-navigation/native';
 
 export default function Profile() {
   const { user, signOut } = useAuthStore();
@@ -61,6 +63,25 @@ export default function Profile() {
                 } catch (e) {
                   Alert.alert('Sync Failed', e.message);
                 }
+              }
+            },
+            { label: 'Load Demo Data', icon: 'flask-outline',
+              onPress: async () => {
+                if (!user) return Alert.alert('Not Logged In');
+                Alert.alert('Load Demo Data?', 'This will populate your app with sample routines, history, and nutrition logs.', [
+                  { text: 'Cancel', style: 'cancel' },
+                  { text: 'Load', style: 'default',
+                    onPress: async () => {
+                      try {
+                        const success = await loadDemoData(user.id);
+                        if (success) Alert.alert('Success', 'Demo data loaded and synced! Restart the app to see all changes.');
+                        else Alert.alert('Error', 'Failed to load demo data.');
+                      } catch (e) {
+                        Alert.alert('Error', e.message);
+                      }
+                    }
+                  }
+                ]);
               }
             },
             { label: 'Nutrition Goals', icon: 'nutrition-outline',
