@@ -222,26 +222,35 @@ export default function Progress() {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.bg }}>
-          <Text style={{ color: colors.accent, fontSize: 11,
-            fontWeight: '800' }}>1RM CALC</Text>
-        </TouchableOpacity>
-      </View>
+      <Animatable.View animation="fadeInUp" duration={400} style={{ flex: 1 }}>
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between',
+          alignItems: 'center', padding: 20, paddingBottom: 0 }}>
+          <Text style={{ color: colors.white, fontSize: 28,
+            fontWeight: '900' }}>Progress</Text>
+          <TouchableOpacity onPress={() => setShowCalc(true)}
+            style={{ backgroundColor: colors.surface, borderRadius: 10,
+              padding: 10, borderWidth: 1, borderColor: colors.border }}>
+            <Text style={{ color: colors.accent, fontSize: 11,
+              fontWeight: '800' }}>1RM CALC</Text>
+          </TouchableOpacity>
+        </View>
 
-      <View style={{ paddingHorizontal: 20, marginTop: 10 }}>
-        {renderTabs()}
-      </View>
+        <View style={{ paddingHorizontal: 20, marginTop: 10 }}>
+          {renderTabs()}
+        </View>
 
-      <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 20, paddingTop: 0 }}>
-        {activeTab === 'Exercise' && renderExercise()}
-        {activeTab === 'Volume' && renderVolume()}
-        {activeTab === 'Muscle Split' && renderMuscleSplit()}
-        {activeTab === 'Frequency' && renderFrequency()}
-      </ScrollView>
+        <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 20, paddingTop: 0 }}>
+          {activeTab === 'Exercise' && renderExercise()}
+          {activeTab === 'Volume' && renderVolume()}
+          {activeTab === 'Muscle Split' && renderMuscleSplit()}
+          {activeTab === 'Frequency' && renderFrequency()}
+        </ScrollView>
 
-      <OneRMCalculator
-        visible={showCalc}
-        onClose={() => setShowCalc(false)}
-      />
+        <OneRMCalculator
+          visible={showCalc}
+          onClose={() => setShowCalc(false)}
+        />
+      </Animatable.View>
     </SafeAreaView>
   );
 }
