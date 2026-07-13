@@ -8,16 +8,19 @@ import useRoutineStore from '../../store/useRoutineStore';
 import ExerciseCard from '../../components/ExerciseCard';
 import EmptyState from '../../components/EmptyState';
 import { getDaysForRoutine, getExercisesForDay } from '../../db/routines';
+import { getWorkoutStreak } from '../../db/sessions';
 import { colors, font, radius } from '../../constants/theme';
 import LoadingScreen from '../../components/LoadingScreen';
 
 export default function Dashboard() {
   const { activeRoutine, loadRoutines } = useRoutineStore();
   const [loading, setLoading] = useState(true);
+  const [streak, setStreak] = useState(0);
 
   useFocusEffect(useCallback(() => {
     setLoading(true);
     loadRoutines();
+    setStreak(getWorkoutStreak());
     setLoading(false);
   }, []));
 
@@ -35,17 +38,37 @@ export default function Dashboard() {
         <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 20 }}>
           <View style={{ flexDirection: 'row',
             justifyContent: 'space-between', alignItems: 'flex-start' }}>
-          <View>
-            <Text style={{ color: colors.muted, fontSize: font.sm,
-              letterSpacing: 1, textTransform: 'uppercase' }}>{today}</Text>
-            <Text style={{ color: colors.white, fontSize: 26,
-              fontWeight: '900', marginTop: 2, lineHeight: 30 }}>
-              {"Today's\nWorkout"}
+            <View>
+              <Text style={{ color: colors.muted, fontSize: font.sm,
+                letterSpacing: 1, textTransform: 'uppercase' }}>{today}</Text>
+              <Text style={{ color: colors.white, fontSize: 26,
+                fontWeight: '900', marginTop: 2, lineHeight: 30 }}>
+                {"Today's\nWorkout"}
+              </Text>
+            </View>
+          </View>
+
+          <View style={{ backgroundColor: '#1A1A1A',
+            borderRadius: 12, padding: 14, marginBottom: 16,
+            borderWidth: 1, borderColor: '#2A2A2A',
+            flexDirection: 'row', alignItems: 'center',
+            justifyContent: 'space-between', marginTop: 16 }}>
+            <View>
+              <Text style={{ color: '#888', fontSize: 10,
+                textTransform: 'uppercase', letterSpacing: 1 }}>
+                Current Streak
+              </Text>
+              <Text style={{ color: '#fff', fontSize: 22,
+                fontWeight: '900', marginTop: 2 }}>
+                {streak} days 🔥
+              </Text>
+            </View>
+            <Text style={{ fontSize: 36 }}>
+              {streak >= 7 ? '🏆' : streak >= 3 ? '⚡' : '💪'}
             </Text>
           </View>
-        </View>
 
-        {!activeRoutine ? (
+          {!activeRoutine ? (
           <EmptyState
             icon="barbell-outline"
             title="No active routine"

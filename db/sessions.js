@@ -197,3 +197,27 @@ export const getWorkoutFrequency = () => {
     return [];
   }
 };
+
+export const getWorkoutStreak = () => {
+  try {
+    const sessions = db.getAllSync(
+      'SELECT DISTINCT date FROM sessions ORDER BY date DESC'
+    );
+    if (!sessions.length) return 0;
+    let streak = 0;
+    let current = new Date();
+    current.setHours(0,0,0,0);
+    for (const s of sessions) {
+      const d = new Date(s.date);
+      d.setHours(0,0,0,0);
+      const diff = (current - d) / (1000 * 60 * 60 * 24);
+      if (diff <= 1) { streak++; current = d; }
+      else break;
+    }
+    return streak;
+  } catch (error) {
+    console.error('[RepBase DB Error]', error);
+    return 0;
+  }
+};
+
