@@ -63,79 +63,130 @@ export default function Progress() {
     </ScrollView>
   );
 
-  const renderExercise = () => (
-    <>
-      <TouchableOpacity onPress={() => setShowPicker(!showPicker)}
-        style={{ backgroundColor: colors.surface, borderRadius: radius.card,
-          padding: 14, borderWidth: 1, borderColor: colors.border,
-          flexDirection: 'row', justifyContent: 'space-between',
-          alignItems: 'center', marginBottom: 8 }}>
-        <Text style={{ color: colors.white, fontSize: font.md,
-          fontWeight: '700' }}>{selected?.name || 'Select exercise'}</Text>
-        <Text style={{ color: colors.muted, fontSize: font.sm }}>▼</Text>
-      </TouchableOpacity>
+  const renderExercise = () => {
+    const prEntry = progress.find(p => p.max_weight === pb);
+    const prDate = prEntry ? prEntry.date : null;
 
-      {showPicker && (
-        <View style={{ backgroundColor: colors.surface, borderRadius: radius.card,
-          borderWidth: 1, borderColor: colors.border, marginBottom: 16 }}>
-          {exercises.map((ex) => (
-            <TouchableOpacity key={ex.id} onPress={() => selectExercise(ex)}
-              style={{ padding: 14, borderBottomWidth: 1,
-                borderBottomColor: colors.border }}>
-              <Text style={{ color: colors.white,
-                fontSize: font.md }}>{ex.name}</Text>
-              <Text style={{ color: colors.muted,
-                fontSize: font.sm }}>{ex.category}</Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-      )}
+    return (
+      <>
+        <TouchableOpacity onPress={() => setShowPicker(!showPicker)}
+          style={{ backgroundColor: colors.surface, borderRadius: radius.card,
+            padding: 14, borderWidth: 1, borderColor: colors.border,
+            flexDirection: 'row', justifyContent: 'space-between',
+            alignItems: 'center', marginBottom: 8 }}>
+          <Text style={{ color: colors.white, fontSize: font.md,
+            fontWeight: '700' }}>{selected?.name || 'Select exercise'}</Text>
+          <Text style={{ color: colors.muted, fontSize: font.sm }}>▼</Text>
+        </TouchableOpacity>
 
-      {progress.length < 2 ? (
-        <EmptyState
-          icon="bar-chart-outline"
-          title="Not enough data"
-          subtitle="Log at least 2 sessions with this exercise to see progress"
-        />
-      ) : (
-        <>
-          <View style={{ flexDirection: 'row', gap: 10, marginBottom: 20 }}>
-            {[
-              { label: 'Personal Best', value: pb ? `${pb} kg` : '--' },
-              { label: 'Sessions', value: progress.length },
-              { label: 'Total Sets', value: progress.reduce((a, b) => a + b.total_sets, 0) },
-            ].map((stat) => (
-              <View key={stat.label} style={{ flex: 1, backgroundColor: colors.surface,
+        {showPicker && (
+          <View style={{ backgroundColor: colors.surface, borderRadius: radius.card,
+            borderWidth: 1, borderColor: colors.border, marginBottom: 16 }}>
+            {exercises.map((ex) => {
+              const hasPb = !!getPersonalBest(ex.id)?.pb;
+              return (
+                <TouchableOpacity key={ex.id} onPress={() => selectExercise(ex)}
+                  style={{ padding: 14, borderBottomWidth: 1,
+                    borderBottomColor: colors.border,
+                    flexDirection: 'row', justifyContent: 'space-between',
+                    alignItems: 'center' }}>
+                  <View>
+                    <Text style={{ color: colors.white,
+                      fontSize: font.md }}>{ex.name}</Text>
+                    <Text style={{ color: colors.muted,
+                      fontSize: font.sm }}>{ex.category}</Text>
+                  </View>
+                  {hasPb && <Text style={{ fontSize: 16 }}>🏆</Text>}
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+        )}
+
+        {progress.length < 2 ? (
+          <EmptyState
+            icon="bar-chart-outline"
+            title="Not enough data"
+            subtitle="Log at least 2 sessions with this exercise to see progress"
+          />
+        ) : (
+          <>
+            <View style={{ flexDirection: 'row', gap: 10, marginBottom: 20 }}>
+              {/* Personal Best Card */}
+              <View style={{ flex: 1, backgroundColor: colors.surface,
                 borderRadius: radius.card, padding: 12,
-                borderWidth: 1, borderColor: colors.border, alignItems: 'center' }}>
+                borderWidth: 1, borderColor: colors.border, alignItems: 'center', justifyContent: 'center' }}>
                 <Text style={{ color: colors.muted, fontSize: 10,
-                  textTransform: 'uppercase', letterSpacing: 0.5 }}>{stat.label}</Text>
-                <Text style={{ color: colors.accent, fontSize: 20,
-                  fontWeight: '900', marginTop: 4 }}>{stat.value}</Text>
+                  textTransform: 'uppercase', letterSpacing: 0.5 }}>Personal Best</Text>
+                <Text style={{ color: '#F5C518', fontSize: 20,
+                  fontWeight: '900', marginTop: 4 }}>{pb ? `${pb} kg` : '--'}</Text>
+                {pb && prDate && (
+                  <Text style={{ color: colors.muted, fontSize: 9, marginTop: 2 }}>
+                    {prDate}
+                  </Text>
+                )}
               </View>
-            ))}
-          </View>
-          <View style={{ alignItems: 'center' }}>
-            <LineChart
-              data={progress.map((p) => ({ value: p.max_weight, label: p.date.slice(5) }))}
-              color={colors.accent}
-              thickness={2}
-              dataPointsColor={colors.accent}
-              backgroundColor={colors.surface}
-              xAxisColor={colors.border}
-              yAxisColor={colors.border}
-              yAxisTextStyle={{ color: colors.muted, fontSize: 10 }}
-              xAxisLabelTextStyle={{ color: colors.muted, fontSize: 9 }}
-              hideRules
-              curved
-              width={280}
-              height={180}
-            />
-          </View>
-        </>
-      )}
-    </>
-  );
+
+              {/* Sessions Card */}
+              <View style={{ flex: 1, backgroundColor: colors.surface,
+                borderRadius: radius.card, padding: 12,
+                borderWidth: 1, borderColor: colors.border, alignItems: 'center', justifyContent: 'center' }}>
+                <Text style={{ color: colors.muted, fontSize: 10,
+                  textTransform: 'uppercase', letterSpacing: 0.5 }}>Sessions</Text>
+                <Text style={{ color: colors.accent, fontSize: 20,
+                  fontWeight: '900', marginTop: 4 }}>{progress.length}</Text>
+              </View>
+
+              {/* Total Sets Card */}
+              <View style={{ flex: 1, backgroundColor: colors.surface,
+                borderRadius: radius.card, padding: 12,
+                borderWidth: 1, borderColor: colors.border, alignItems: 'center', justifyContent: 'center' }}>
+                <Text style={{ color: colors.muted, fontSize: 10,
+                  textTransform: 'uppercase', letterSpacing: 0.5 }}>Total Sets</Text>
+                <Text style={{ color: colors.accent, fontSize: 20,
+                  fontWeight: '900', marginTop: 4 }}>{progress.reduce((a, b) => a + b.total_sets, 0)}</Text>
+              </View>
+            </View>
+
+            {pb && (
+              <View style={{ backgroundColor: '#1A1A1A',
+                borderRadius: 12, padding: 14,
+                borderWidth: 1.5, borderColor: '#F5C518',
+                flexDirection: 'row', alignItems: 'center',
+                gap: 12, marginBottom: 16 }}>
+                <Text style={{ fontSize: 28 }}>🏆</Text>
+                <View>
+                  <Text style={{ color: '#888', fontSize: 10,
+                    textTransform: 'uppercase',
+                    letterSpacing: 1 }}>All Time PR</Text>
+                  <Text style={{ color: '#F5C518', fontSize: 24,
+                    fontWeight: '900' }}>{pb} kg</Text>
+                </View>
+              </View>
+            )}
+
+            <View style={{ alignItems: 'center' }}>
+              <LineChart
+                data={progress.map((p) => ({ value: p.max_weight, label: p.date.slice(5) }))}
+                color={colors.accent}
+                thickness={2}
+                dataPointsColor={colors.accent}
+                backgroundColor={colors.surface}
+                xAxisColor={colors.border}
+                yAxisColor={colors.border}
+                yAxisTextStyle={{ color: colors.muted, fontSize: 10 }}
+                xAxisLabelTextStyle={{ color: colors.muted, fontSize: 9 }}
+                hideRules
+                curved
+                width={280}
+                height={180}
+              />
+            </View>
+          </>
+        )}
+      </>
+    );
+  };
 
   const renderVolume = () => {
     if (volumeData.length === 0) return <EmptyState title="No Volume Data" subtitle="Log workouts to see volume over time" icon="bar-chart" />;
