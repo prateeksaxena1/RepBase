@@ -221,3 +221,35 @@ export const getWorkoutStreak = () => {
   }
 };
 
+export const getTotalStats = () => {
+  try {
+    const sessions = db.getFirstSync(
+      'SELECT COUNT(*) as total FROM sessions'
+    );
+    const sets = db.getFirstSync(
+      'SELECT COUNT(*) as total FROM session_sets'
+    );
+    const volume = db.getFirstSync(
+      'SELECT ROUND(SUM(weight_kg * reps), 0) as total FROM session_sets'
+    );
+    const prs = db.getFirstSync(
+      'SELECT COUNT(*) as total FROM session_sets WHERE is_personal_best = 1'
+    );
+    return {
+      workouts: sessions?.total || 0,
+      sets: sets?.total || 0,
+      volume: volume?.total || 0,
+      prs: prs?.total || 0,
+    };
+  } catch (error) {
+    console.error('[RepBase DB Error]', error);
+    return {
+      workouts: 0,
+      sets: 0,
+      volume: 0,
+      prs: 0,
+    };
+  }
+};
+
+
