@@ -120,6 +120,8 @@ export default function Profile() {
             },
             { label: 'Nutrition Goals', icon: 'nutrition-outline',
               onPress: () => router.push('/nutrition/goals') },
+            { label: 'Weight Check-In', icon: 'scale-outline',
+              onPress: () => router.push('/metrics/weight') },
             { label: 'Export Data', icon: 'download-outline',
               onPress: () => Alert.alert('Coming soon') },
             { label: 'About RepBase', icon: 'information-circle-outline',
