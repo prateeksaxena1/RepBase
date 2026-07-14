@@ -4,6 +4,7 @@ import { useState, useCallback } from 'react';
 import { router, useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import * as Animatable from 'react-native-animatable';
+import { LineChart } from 'react-native-gifted-charts';
 import { logWeight, getWeightHistory } from '../../db/bodyMetrics';
 import useAuthStore from '../../store/useAuthStore';
 import { colors, font, radius } from '../../constants/theme';
@@ -17,12 +18,13 @@ export default function WeightCheckIn() {
   const [inputValue, setInputValue] = useState('');
   const [unit, setUnit] = useState('kg');
   const [success, setSuccess] = useState(false);
+  const [daysRange, setDaysRange] = useState(30);
 
   const fetchWeightHistory = useCallback(async () => {
     if (!user) return;
     setLoading(true);
     try {
-      const logs = await getWeightHistory(user.id, 50);
+      const logs = await getWeightHistory(user.id, 100);
       setHistory(logs);
       
       const todayStr = new Date().toLocaleDateString('en-CA');
@@ -91,6 +93,172 @@ export default function WeightCheckIn() {
     }
   };
 
+  const normalizeWeight = (weight, fromUnit, toUnit) => {
+    if (fromUnit === toUnit) return weight;
+    if (toUnit === 'lb') {
+      return Math.round(weight * 2.20462 * 10) / 10;
+    } else {
+      return Math.round((weight / 2.20462) * 10) / 10;
+    }
+  };
+
+  const renderTrendChart = () => {
+    if (loading) return null;
+
+    if (history.length === 0) {
+      return (
+        <View style={{
+          backgroundColor: '#1A1A1A',
+          borderRadius: 16,
+          padding: 20,
+          borderWidth: 1,
+          borderColor: '#2A2A2A',
+          alignItems: 'center',
+          marginTop: 20,
+        }}>
+          <Ionicons name="trending-up-outline" size={32} color={colors.muted} style={{ marginBottom: 10 }} />
+          <Text style={{ color: '#fff', fontSize: 16, fontWeight: '700', marginBottom: 4 }}>
+            No Weight History Yet
+          </Text>
+          <Text style={{ color: colors.muted, fontSize: 13, textAlign: 'center', marginBottom: 14 }}>
+            Log your weight to start tracking your trends over time.
+          </Text>
+        </View>
+      );
+    }
+
+    // Filter by date range
+    const cutoffDate = new Date();
+    cutoffDate.setDate(cutoffDate.getDate() - daysRange);
+    const filteredHistory = history.filter(
+      (log) => new Date(log.logged_at) >= cutoffDate
+    );
+
+    // Normalize and map data in chronological order
+    const chartData = [...filteredHistory]
+      .reverse()
+      .map((log) => ({
+        value: normalizeWeight(log.weight, log.unit, unit),
+        label: new Date(log.logged_at).toLocaleDateString('en-US', {
+          month: 'short',
+          day: 'numeric',
+        }),
+      }));
+
+    if (chartData.length === 0) {
+      return (
+        <View style={{
+          backgroundColor: '#1A1A1A',
+          borderRadius: 16,
+          padding: 20,
+          borderWidth: 1,
+          borderColor: '#2A2A2A',
+          alignItems: 'center',
+          marginTop: 20,
+        }}>
+          <Text style={{ color: '#fff', fontSize: 16, fontWeight: '700', marginBottom: 4 }}>
+            No Data in Last {daysRange} Days
+          </Text>
+          <Text style={{ color: colors.muted, fontSize: 13, textAlign: 'center', marginBottom: 14 }}>
+            Try toggling the range or log a new entry.
+          </Text>
+          <View style={{ flexDirection: 'row', gap: 10 }}>
+            <TouchableOpacity
+              onPress={() => setDaysRange(30)}
+              style={{
+                backgroundColor: daysRange === 30 ? '#F5C518' : '#2A2A2A',
+                borderRadius: 8,
+                paddingVertical: 6,
+                paddingHorizontal: 12,
+              }}
+            >
+              <Text style={{ color: daysRange === 30 ? '#0D0D0D' : '#fff', fontWeight: '700', fontSize: 12 }}>
+                30 Days
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => setDaysRange(90)}
+              style={{
+                backgroundColor: daysRange === 90 ? '#F5C518' : '#2A2A2A',
+                borderRadius: 8,
+                paddingVertical: 6,
+                paddingHorizontal: 12,
+              }}
+            >
+              <Text style={{ color: daysRange === 90 ? '#0D0D0D' : '#fff', fontWeight: '700', fontSize: 12 }}>
+                90 Days
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      );
+    }
+
+    return (
+      <View style={{
+        backgroundColor: '#1A1A1A',
+        borderRadius: 16,
+        padding: 16,
+        borderWidth: 1,
+        borderColor: '#2A2A2A',
+        marginTop: 20,
+        alignItems: 'center',
+      }}>
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between', width: '100%', alignItems: 'center', marginBottom: 16 }}>
+          <Text style={{ color: '#fff', fontSize: 16, fontWeight: '800' }}>
+            Weight Trend ({unit === 'lb' ? 'lbs' : 'kg'})
+          </Text>
+          {/* Days Range Toggle */}
+          <View style={{ flexDirection: 'row', backgroundColor: '#2A2A2A', borderRadius: 8, padding: 2 }}>
+            <TouchableOpacity
+              onPress={() => setDaysRange(30)}
+              style={{
+                backgroundColor: daysRange === 30 ? '#F5C518' : 'transparent',
+                borderRadius: 6,
+                paddingVertical: 4,
+                paddingHorizontal: 10,
+              }}
+            >
+              <Text style={{ color: daysRange === 30 ? '#0D0D0D' : '#888', fontWeight: '800', fontSize: 11 }}>
+                30D
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => setDaysRange(90)}
+              style={{
+                backgroundColor: daysRange === 90 ? '#F5C518' : 'transparent',
+                borderRadius: 6,
+                paddingVertical: 4,
+                paddingHorizontal: 10,
+              }}
+            >
+              <Text style={{ color: daysRange === 90 ? '#0D0D0D' : '#888', fontWeight: '800', fontSize: 11 }}>
+                90D
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        <LineChart
+          data={chartData}
+          color={colors.accent}
+          thickness={3}
+          dataPointsColor={colors.accent}
+          dataPointsRadius={4}
+          backgroundColor="transparent"
+          xAxisColor={colors.border}
+          yAxisColor={colors.border}
+          yAxisTextStyle={{ color: colors.muted, fontSize: 10 }}
+          xAxisLabelTextStyle={{ color: colors.muted, fontSize: 9 }}
+          hideRules
+          curved={chartData.length >= 3}
+          width={280}
+          height={160}
+        />
+      </View>
+    );
+  };
+
   const keys = [
     ['1', '2', '3'],
     ['4', '5', '6'],
@@ -139,21 +307,21 @@ export default function WeightCheckIn() {
           </Text>
         </View>
 
-        {/* Success Card Centered */}
-        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20 }}>
+        <ScrollView contentContainerStyle={{ padding: 20 }}>
+          {/* Success Card */}
           <View style={{
             backgroundColor: '#1A1A1A',
             borderRadius: 16,
             padding: 30,
             borderWidth: 1.5,
             borderColor: '#F5C518',
-            width: '100%',
             alignItems: 'center',
             shadowColor: '#000',
             shadowOffset: { width: 0, height: 4 },
             shadowOpacity: 0.3,
             shadowRadius: 5,
             elevation: 8,
+            marginBottom: 20,
           }}>
             <View style={{
               width: 72,
@@ -211,7 +379,10 @@ export default function WeightCheckIn() {
               </TouchableOpacity>
             </View>
           </View>
-        </View>
+
+          {/* Weight Trend Chart */}
+          {renderTrendChart()}
+        </ScrollView>
       </SafeAreaView>
     );
   }
@@ -344,6 +515,9 @@ export default function WeightCheckIn() {
             </TouchableOpacity>
           ) : null}
         </View>
+
+        {/* Weight Trend Chart */}
+        {renderTrendChart()}
       </ScrollView>
     </SafeAreaView>
   );
