@@ -128,3 +128,34 @@ DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
 CREATE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
   FOR EACH ROW EXECUTE FUNCTION handle_new_user();
+
+-- WEIGHT LOGS
+CREATE TABLE IF NOT EXISTS weight_logs (
+  id         UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id    UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
+  weight     NUMERIC NOT NULL,
+  unit       TEXT NOT NULL CHECK (unit IN ('lb', 'kg')),
+  logged_at  TIMESTAMPTZ DEFAULT NOW() NOT NULL,
+  note       TEXT
+);
+ALTER TABLE weight_logs ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Users manage own weight logs" ON weight_logs;
+CREATE POLICY "Users manage own weight logs"
+  ON weight_logs FOR ALL USING (auth.uid() = user_id);
+
+-- BODY MEASUREMENTS
+CREATE TABLE IF NOT EXISTS body_measurements (
+  id         UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id    UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
+  waist      NUMERIC,
+  chest      NUMERIC,
+  arms       NUMERIC,
+  thighs     NUMERIC,
+  hips       NUMERIC,
+  logged_at  TIMESTAMPTZ DEFAULT NOW() NOT NULL
+);
+ALTER TABLE body_measurements ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Users manage own body measurements" ON body_measurements;
+CREATE POLICY "Users manage own body measurements"
+  ON body_measurements FOR ALL USING (auth.uid() = user_id);
+
